@@ -16,7 +16,11 @@ const ButtonStyled = styled(Button)`
   &:hover {
     .check-icon {
         display: inline-block;
-    }   
+    }       {
+      "todos": [
+        { "id": "1", "name": "Việc mẫu", "isCompleted": false }
+      ]
+    }
   }
 
   .check-icon {

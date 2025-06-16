@@ -2,63 +2,73 @@ import './App.css';
 import TodoList from './components/TodoList';
 import Textfield from '@atlaskit/textfield';
 import Button from '@atlaskit/button';
-import { useCallback, useEffect, useState, useRef } from 'react';
-import { v4 } from 'uuid';
-
-const TODO_APP_STORAGE_KEY = "TODO_APP";
+import { useCallback, useEffect, useState } from 'react';
 
 function App() {
   const [todoList, setTodoList] = useState([]);
   const [textInput, setTextInput] = useState('');
-  const isFirstLoad = useRef(true);
 
+  // Lấy danh sách todo từ API khi load trang
   useEffect(() => {
-    if (isFirstLoad.current) {
-      const storedTodoList = localStorage.getItem(TODO_APP_STORAGE_KEY);
-      if (storedTodoList) {
-        setTodoList(JSON.parse(storedTodoList));
-      }
-      isFirstLoad.current = false;
-    }
+    fetch('http://localhost:3001/todos')
+      .then(res => res.json())
+      .then(data => setTodoList(data));
   }, []);
-
-  useEffect(() => {
-    if (!isFirstLoad.current) {
-      localStorage.setItem(TODO_APP_STORAGE_KEY, JSON.stringify(todoList));
-    }
-  }, [todoList]);
 
   const onTextInputChange = useCallback((e) => {
     setTextInput(e.target.value);
   }, []);
 
-  const onAddBtnClick = useCallback((e) => {
-    setTodoList(prevTodoList => [
-      { id: v4(), name: textInput, isCompleted: false },
-      ...prevTodoList,
-    ]);
-
+  // Thêm todo qua API
+  const onAddBtnClick = useCallback(() => {
+    fetch('http://localhost:3001/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: textInput, isCompleted: false })
+    })
+      .then(res => res.json())
+      .then(newTodo => setTodoList(prev => [newTodo, ...prev]));
     setTextInput('');
   }, [textInput]);
 
+  // Đánh dấu hoàn thành qua API
   const onCheckBtnClick = useCallback((id) => {
-    setTodoList(prevState => 
-      prevState.map(todo => 
-        todo.id === id ? { ...todo, isCompleted: true } : todo
-      )
-    );
-  }, []);
+    const todo = todoList.find(t => t.id === id);
+    if (!todo || todo.isCompleted) return;
+    fetch(`http://localhost:3001/todos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isCompleted: true })
+    })
+      .then(res => res.json())
+      .then(updatedTodo =>
+        setTodoList(prev =>
+          prev.map(t => t.id === id ? updatedTodo : t)
+        )
+      );
+  }, [todoList]);
 
+  // Xóa todo qua API
   const onDeleteBtnClick = useCallback((id) => {
-    setTodoList(prevState => prevState.filter(todo => todo.id !== id));
+    fetch(`http://localhost:3001/todos/${id}`, {
+      method: 'DELETE'
+    })
+      .then(() => setTodoList(prev => prev.filter(todo => todo.id !== id)));
   }, []);
 
+  // Sửa tên todo qua API
   const onEditBtnClick = useCallback((id, newName) => {
-    setTodoList(prevState =>
-      prevState.map(todo =>
-        todo.id === id ? { ...todo, name: newName } : todo
-      )
-    );
+    fetch(`http://localhost:3001/todos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName })
+    })
+      .then(res => res.json())
+      .then(updatedTodo =>
+        setTodoList(prev =>
+          prev.map(todo => todo.id === id ? updatedTodo : todo)
+        )
+      );
   }, []);
 
   return (
@@ -76,13 +86,12 @@ function App() {
         value={textInput}
         onChange={onTextInputChange}
       ></Textfield>
-      <TodoList 
-        todoList={todoList} 
-        onCheckBtnClick={onCheckBtnClick} 
+      <TodoList
+        todoList={todoList}
+        onCheckBtnClick={onCheckBtnClick}
         onDeleteBtnClick={onDeleteBtnClick}
         onEditBtnClick={onEditBtnClick}
       />
-      
     </>
   );
 }
