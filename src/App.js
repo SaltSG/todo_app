@@ -49,6 +49,18 @@ function App() {
     );
   }, []);
 
+  const onDeleteBtnClick = useCallback((id) => {
+    setTodoList(prevState => prevState.filter(todo => todo.id !== id));
+  }, []);
+
+  const onEditBtnClick = useCallback((id, newName) => {
+    setTodoList(prevState =>
+      prevState.map(todo =>
+        todo.id === id ? { ...todo, name: newName } : todo
+      )
+    );
+  }, []);
+
   return (
     <>
       <h3>Danh sách cần làm</h3>
@@ -64,7 +76,12 @@ function App() {
         value={textInput}
         onChange={onTextInputChange}
       ></Textfield>
-      <TodoList todoList={todoList} onCheckBtnClick={onCheckBtnClick} />
+      <TodoList 
+        todoList={todoList} 
+        onCheckBtnClick={onCheckBtnClick} 
+        onDeleteBtnClick={onDeleteBtnClick}
+        onEditBtnClick={onEditBtnClick}
+      />
       
     </>
   );
