@@ -8,7 +8,7 @@ function App() {
   const [todoList, setTodoList] = useState([]);
   const [textInput, setTextInput] = useState('');
 
-  // Lấy danh sách todo từ API khi load trang
+  // Lấy danh sách todo từ API 
   useEffect(() => {
     fetch('http://localhost:3001/todos')
       .then(res => res.json())
