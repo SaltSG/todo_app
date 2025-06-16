@@ -19,7 +19,7 @@ function App() {
     setTextInput(e.target.value);
   }, []);
 
-  // Thêm todo qua API
+  // Thêm todo qua 
   const onAddBtnClick = useCallback(() => {
     fetch('http://localhost:3001/todos', {
       method: 'POST',
