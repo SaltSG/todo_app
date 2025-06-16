@@ -1,37 +1,5 @@
 import React, { useState } from 'react';
 import Button from '@atlaskit/button';
-import styled, {css} from 'styled-components'
-import CheckIcon from '@atlaskit/icon/glyph/check'
-
-const ButtonStyled = styled(Button)`
-  margin-top: 5px;
-  text-align: left;
-  
-  &, &:hover {
-    ${(p => p.isCompleted && css`
-        text-decoration: line-through;
-    `)}
-  }
-
-  &:hover {
-    .check-icon {
-        display: inline-block;
-    }       {
-      "todos": [
-        { "id": "1", "name": "Việc mẫu", "isCompleted": false }
-      ]
-    }
-  }
-
-  .check-icon {
-    display: none;
-
-    &:hover {
-        background-color: #e2e2e2;
-        border-radius: 3px;
-        }
-    }
-`
 
 export default function Todo({ todo, onCheckBtnClick, onDeleteBtnClick, onEditBtnClick }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -78,7 +46,10 @@ export default function Todo({ todo, onCheckBtnClick, onDeleteBtnClick, onEditBt
           </Button>
           <Button
             appearance="warning"
-            onClick={() => setIsEditing(true)}
+            onClick={() => {
+              setIsEditing(true);
+              setEditValue(todo.name);
+            }}
             style={{ marginRight: 8 }}
           >
             Sửa
